@@ -1,22 +1,26 @@
-version: "3.8"
-
 services:
-  # Ejemplo de un servidor Fabric
   mc_fabric:
     image: itzg/minecraft-server
     container_name: mc_fabric
+    env_file:
+      - ../.env
     environment:
       EULA: "TRUE"
-      TYPE: "FABRIC"
-      VERSION: "1.20.4"
-      MEMORY: "3G"
-      ENABLE_RCON: "true"
-      RCON_PASSWORD: "minecraft123"
+      TYPE: ${MC_TYPE}
+      VERSION: ${MC_VERSION}
+      ENABLE_RCON: ${ENABLE_RCON}
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      RCON_PORT: ${RCON_PORT}
+      MEMORY: ${MEMORY_MAX}
+      JVM_OPTS: ${JVM_OPTS}
+    ports:
+      - "${PORT_FABRIC}:25565"
+      - "${RCON_PORT}:${RCON_PORT}"
     volumes:
       - ../servers/fabric:/data
-    ports:
-      - "25565:25565"
     restart: always
+
+
 
   # MineOS para gestión visual opcional
   mineos:
