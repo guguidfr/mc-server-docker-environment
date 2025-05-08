@@ -1,0 +1,82 @@
+services:
+  # Crafty Controller - Panel web
+  crafty:
+    container_name: crafty_container
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    restart: always
+    environment:
+      - TZ=Etc/UTC
+    ports:
+      - "8000:8000"       # Web UI HTTP
+      - "8443:8443"       # Web UI HTTPS
+    volumes:
+      - ./docker/crafty/backups:/crafty/backups
+      - ./docker/crafty/logs:/crafty/logs
+      - ./docker/crafty/servers:/crafty/servers
+      - ./docker/crafty/config:/crafty/app/config
+      - ./docker/crafty/import:/crafty/import
+
+  # Servidor de Minecraft Fabric 1.20.5
+  mc_fabric:
+    image: itzg/minecraft-server
+    container_name: mc_fabric
+    env_file:
+      - .env
+    environment:
+      EULA: "TRUE"
+      TYPE: "FABRIC"
+      VERSION: ${MC_VERSION}
+      ENABLE_RCON: "true"
+      RCON_PASSWORD: ${RCON_PASSWORD}
+      JVM_OPTS: ${JVM_OPTS}
+      OVERRIDE_SERVER_JAR: "false"
+      STARTUP_COMMAND: "echo Server not auto-starting"
+    volumes:
+      - ./docker/servers/fabric:/data
+    ports:
+      - "${MC_PORT}:25565"
+    restart: unless-stopped
+
+  # Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  # Grafana
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    restart: unless-stopped
+
+  # Node Exporter (host stats)
+  node_exporter:
+    image: prom/node-exporter
+    container_name: node_exporter
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  # cAdvisor (Docker container stats)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  grafana-storage:
