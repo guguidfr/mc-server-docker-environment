@@ -1,2 +1,5 @@
 # mc-server-docker-environment
-Build Minecraft servers fully monitorized using Docker containers
+Builds a Crafty container to create various Minecraft servers.
+---
+
+Use `dir-reset.sh` to create the needed folders, and `get-crafty-passwd.sh` to get the first login crafty password.
