@@ -5,6 +5,8 @@ services:
     restart: always
     environment:
       - TZ=Etc/UTC
+    dns:
+      - 8.8.8.8
     ports:
       - "8000:8000"        # Web UI HTTP
       - "8443:8443"        # Web UI HTTPS
